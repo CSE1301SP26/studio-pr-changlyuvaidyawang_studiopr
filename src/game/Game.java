@@ -8,6 +8,12 @@ import edu.princeton.cs.introcs.StdDraw;
 
 public class Game {
     
+    private static final int INITIAL_ENEMIES = 3;
+    private static final int INITIAL_SCORE = 0;
+    private static final double SCORE_TEXT_X = 0.1;
+    private static final double SCORE_TEXT_Y = 0.9;
+    private static final int PAUSE_TIME = 40;
+
     private Player player;
     private List<Projectile> enemyProjectiles;
     private List<Projectile> playerProjectiles;
@@ -20,8 +26,8 @@ public class Game {
         enemyProjectiles = new LinkedList<>();
         playerProjectiles = new LinkedList<>();
         enemies = new LinkedList<>();
-        numberOfEnemies = 3;
-        score = 0; 
+        numberOfEnemies = INITIAL_ENEMIES;
+        score = INITIAL_SCORE; 
     }
 
     public void run() {
@@ -55,6 +61,13 @@ public class Game {
     }
 
     private void updatePositions() {
+        updateEnemyProjectiles();
+        updatePlayerProjectiles();
+        updateEnemies();
+        updatePlayer();
+    }
+
+    private void updateEnemyProjectiles() {
         for(int i = 0; i < enemyProjectiles.size(); i++) {
             Projectile p = enemyProjectiles.get(i);
             p.moveDown();
@@ -62,7 +75,9 @@ public class Game {
                 enemyProjectiles.remove(p);
             }
         }
+    }
 
+    private void updatePlayerProjectiles() {
         for(int i = 0; i < playerProjectiles.size(); i++) {
             Projectile p = playerProjectiles.get(i);
             p.moveUp();
@@ -70,18 +85,20 @@ public class Game {
                 playerProjectiles.remove(p);
             }
         }
+    }
 
-        for(int i = 0; i < enemies.size(); i++) {
-            Enemy e = enemies.get(i);
+    private void updateEnemies() {
+        for(Enemy e : enemies) {
             e.move();
         }
+    }
 
+    private void updatePlayer() {
         player.move();
     }
 
     private void fireProjectiles() {
-        for(int i = 0; i < enemies.size(); i++) {
-            Enemy e = enemies.get(i);
+        for(Enemy e : enemies) {
             if(e.isFiring() == true) {
                 Projectile p = new Projectile(e.getXPosition(), e.getYPosition() - e.getSize(), Color.RED);
                 enemyProjectiles.add(p);
@@ -95,6 +112,11 @@ public class Game {
     }
 
     private boolean checkCollisions() {
+        checkPlayerProjectileCollisions();
+        return checkEnemyProjectileCollisions();
+    }
+
+    private void checkPlayerProjectileCollisions() {
         for(int i = 0; i < playerProjectiles.size(); i++) {
             Projectile p = playerProjectiles.get(i);
             for(int j = 0; j < enemies.size(); j++) {
@@ -106,9 +128,10 @@ public class Game {
                 }
             }
         }
+    }
 
-        for(int i = 0; i < enemyProjectiles.size(); i++) {
-            Projectile p = enemyProjectiles.get(i);
+    private boolean checkEnemyProjectileCollisions() {
+        for(Projectile p : enemyProjectiles) {
             if(p.collidesWith(player)) {
                 return true;
             }
@@ -118,21 +141,18 @@ public class Game {
 
     private void draw() {
         StdDraw.clear();
-        for(int i = 0; i < enemies.size(); i++) {
-            Enemy e = enemies.get(i);
+        for(Enemy e : enemies) {
             e.draw();
         }
-        for(int i = 0; i < playerProjectiles.size(); i++) {
-            Projectile p = playerProjectiles.get(i);
+        for(Projectile p : playerProjectiles) {
             p.draw();
         }
-        for(int i = 0; i < enemyProjectiles.size(); i++) {
-            Projectile p = enemyProjectiles.get(i);
+        for(Projectile p : enemyProjectiles) {
             p.draw();
         }
         player.draw();
-        StdDraw.text(0.1, 0.9, "Score: " + score);
-        StdDraw.pause(40);
+        StdDraw.text(SCORE_TEXT_X, SCORE_TEXT_Y, "Score: " + score);
+        StdDraw.pause(PAUSE_TIME);
         StdDraw.show();
     }
 
